@@ -2,9 +2,9 @@
 ext {
     configuration = [
             buildToolsVersion: "30.0.0",
-            compileVersion   : 30,
-            minSdk           : 15,
-            targetSdk        : 30
+            compileVersion   : 33,
+            minSdk           : 33,
+            targetSdk        : 33
     ]
 
     libraries = [
@@ -27,6 +27,9 @@ buildscript {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://repo.huaweicloud.com/repository/maven' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.4'
@@ -42,6 +45,9 @@ allprojects {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven { url 'https://maven.aliyun.com/repository/jcenter' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://repo.huaweicloud.com/repository/maven' }
     }
     tasks.withType(Javadoc) {
         options {

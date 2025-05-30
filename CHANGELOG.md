@@ -1,5 +1,10 @@
 AndroidServer
 ===
+Version 1.3.4
+---
+2025-5-30
+* app移除butterfly
+* app可选port启动,控制开关打开server
 
 Version 1.3.3
 ---

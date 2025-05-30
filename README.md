@@ -118,6 +118,10 @@ curl -v 127.0.0.1:8080/hello
 <
 * Connection #0 to host 127.0.0.1 left intact
 hello world
+
+
+# httpie
+http 192.168.16.156:8080/hello   
 ```
 
 ```
@@ -139,6 +143,10 @@ curl -v -d 测试 127.0.0.1:8080/uploadLog
 <
 * Connection #0 to host 127.0.0.1 left intact
 测试
+
+
+# httpie
+http  POST 192.168.16.156:8080/uploadLog haha=1 --verbose
 ```
 
 ## 搭建 WebSocket 服务
@@ -183,6 +191,15 @@ curl -v \
      --header "Sec-WebSocket-Key: NVwjmQUcWCenfWu98asDmg==" \
      --header "Sec-WebSocket-Version: 13" \
      http://127.0.0.1:8080/ws
+     
+# httpie
+http --print=hHb ws://192.168.16.156:8080/ws \
+  Connection:Upgrade \
+  Upgrade:websocket \
+  Host:echo.websocket.org \
+  Origin:https://echo.websocket.org \
+  "Sec-WebSocket-Key:NWV3am1RUXVjV0NlbmZXdWk4YXN EbWI9PQ==" \
+  "Sec-WebSocket-Version:13"
 ```
 
 ```
