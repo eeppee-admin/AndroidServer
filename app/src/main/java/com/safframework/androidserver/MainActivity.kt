@@ -4,9 +4,12 @@ import android.Manifest
 import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.ComponentName
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.CompoundButton
 import android.widget.EditText
 import android.widget.Toast
@@ -14,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import com.kongzue.dialogx.dialogs.InputDialog
+import com.kongzue.dialogx.interfaces.OnInputDialogButtonClickListener
 import com.safframework.androidserver.databinding.ActivityMainBinding
 import com.safframework.androidserver.log.LogProxyImpl
 import com.safframework.androidserver.server.startHttpServer
@@ -23,13 +28,13 @@ import com.safframework.server.core.AndroidServer
 import com.safframework.utils.localIPAddress
 
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var androidServer: AndroidServer
+    var changeTo: String? = null
+    private var androidServer: AndroidServer? = null
     private var port: Int? = 9999 // 默认端口号
     private val CHANNEL_ID = "server_channel"
     private val NOTIFICATION_ID = 1
     private val REQUEST_NOTIFICATION_PERMISSION = 100
-    var inputPort: Int? = null
+    var inputPort: Int? = null // 输入的端口好
 
     private var binding: ActivityMainBinding? = null
 
@@ -49,12 +54,34 @@ class MainActivity : AppCompatActivity() {
                         requestNotificationPermission()
                         showPortInputDialog()
                     } else {
-                        androidServer.close()
+                        androidServer?.close()
                         binding?.content?.text = ""
                         cancelNotification()
                     }
                 }
             }
+        )
+
+        // 切换应用图标
+        binding?.switchAppIconBtn?.setOnClickListener {
+            Toast.makeText(this, javaClass.name + "1", Toast.LENGTH_SHORT).show()
+            changeTo = javaClass.name + "1"
+            changeLauncherIcon(changeTo!!)
+        }
+    }
+
+    //https://juejin.cn/post/7457897807921758234
+    fun changeLauncherIcon(name: String) {
+        val pm = packageManager
+        //隐藏之前显示的桌面组件,todo:为了调试卸载，不要隐藏原来的app图标，否则要去应用卸载
+//        pm.setComponentEnabledSetting(
+//            componentName,
+//            PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP
+//        )
+        //显示新的桌面组件
+        pm.setComponentEnabledSetting(
+            ComponentName(this@MainActivity, name),
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP
         )
     }
 
@@ -124,26 +151,62 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showPortInputDialog() {
-        val inputDialog = AlertDialog.Builder(this)
-        inputDialog.setTitle("请输入端口号")
-        val input = EditText(this)
-        input.inputType = android.text.InputType.TYPE_CLASS_NUMBER
-        inputDialog.setView(input)
-        inputDialog.setPositiveButton("确定") { dialog, which ->
-            inputPort = input.text.toString().toIntOrNull()
-            if (inputPort != null && isValidPort(inputPort!!)) {
-                port = inputPort
-                println("User entered port: $port") // Debug print
-                initData()
-            } else {
-                Toast.makeText(this, "无效的端口号，请选择其他端口", Toast.LENGTH_SHORT).show()
-                binding?.openServerSwitch?.isChecked = false
-            }
-        }
-        inputDialog.setNegativeButton("取消") { dialog, which ->
-            binding?.openServerSwitch?.isChecked = false
-        }
-        inputDialog.show()
+        // dialogx 的ios风格dialog
+        val dia = InputDialog("请输入端口号", "不能输入常见端口号，如3306", "确定", "取消", "")
+            .setCancelable(true)
+            .setOkButton(object : OnInputDialogButtonClickListener<InputDialog> {
+                override fun onClick(
+                    dialog: InputDialog?,
+                    v: View?,
+                    inputStr: String?
+                ): Boolean {
+                    val check = isValidPort(inputStr?.toIntOrNull()!!)
+                    if (check) {
+                        inputPort = inputStr?.toIntOrNull()
+                        port = inputPort
+                        initData()
+                        Toast.makeText(
+                            this@MainActivity,
+                            inputPort.toString(),
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        dialog?.dismiss()
+                    } else {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "无效的端口号，请选择其他端口",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        binding?.openServerSwitch?.isChecked = false
+                    }
+                    return true
+                }
+            })
+        dia.show()
+
+// 下面是安卓内置的dialog
+//        val inputDialog = AlertDialog.Builder(this)
+//        inputDialog.setTitle("请输入端口号,不能输入常见端口号,如3306")
+//        val input = EditText(this)
+//        input.inputType = android.text.InputType.TYPE_CLASS_NUMBER
+//        inputDialog.setView(input)
+//        inputDialog.setPositiveButton("确定") { dialog, which ->
+//            inputPort = input.text.toString().toIntOrNull()
+//            if (inputPort != null && isValidPort(inputPort!!)) {
+//                port = inputPort
+//                println("User entered port: $port") // Debug print
+//                initData()
+//            } else {
+//                Toast.makeText(this, "无效的端口号，请选择其他端口", Toast.LENGTH_SHORT).show()
+//                binding?.openServerSwitch?.isChecked = false
+//            }
+//        }
+//        inputDialog.setNegativeButton("取消") { dialog, which ->
+//            binding?.openServerSwitch?.isChecked = false
+//        }
+//        inputDialog.show()
     }
 
     private fun initData() {
@@ -163,7 +226,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }.build()
 
-            startHttpServer(this@MainActivity, androidServer)
+            startHttpServer(this@MainActivity, androidServer!!)
             sendNotification()
         }
     }
@@ -176,7 +239,11 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onDestroy() {
+        if (changeTo != null) {
+            changeLauncherIcon(changeTo!!)
+        }
+
+        androidServer?.close()
         super.onDestroy()
-        androidServer.close()
     }
 }

@@ -2,7 +2,11 @@ package com.safframework.androidserver.app
 
 import android.content.Context
 import androidx.multidex.MultiDexApplication
+import com.kongzue.dialogx.DialogX
+import com.kongzue.dialogx.interfaces.DialogXStyle
+import com.kongzue.dialogx.style.MaterialStyle
 import kotlin.properties.Delegates
+import com.kongzue.dialogx.style.IOSStyle;
 
 /**
  *
@@ -17,6 +21,10 @@ class App : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
         CONTEXT = applicationContext
+
+        //初始化
+        DialogX.init(this);
+        DialogX.globalStyle = IOSStyle.style()
     }
 
     companion object {

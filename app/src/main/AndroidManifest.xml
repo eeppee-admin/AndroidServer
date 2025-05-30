@@ -1,34 +1,47 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.safframework.androidserver">
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-
 
     <application
-        android:allowBackup="true"
         android:name="com.safframework.androidserver.app.App"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
 
-<!--        android12以上必须声明exported-->
+        <!--        android12以上必须声明exported-->
+<!--            android:enabled="true"-->
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+<!--        主程序别名，可以做应用图标切换-->
+<!--            android:enabled="true"-->
+        <activity-alias
+            android:name=".MainActivityAlias1"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_new"
+            android:label="AndroidServer"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <!--    权限：通知，联网，读写文件-->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
 </manifest>
